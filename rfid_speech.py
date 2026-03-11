@@ -1,5 +1,7 @@
 import serial
-import subprocess
+import win32com.client
+
+speaker = win32com.client.Dispatch("SAPI.SpVoice")
 
 ser = serial.Serial('COM4',115200, timeout=1)
 
@@ -25,10 +27,5 @@ while True:
 
     print("Tag:", line)
 
-    # speak using Windows built-in speech
-    subprocess.run([
-        "powershell",
-        "-Command",
-        f"Add-Type –AssemblyName System.Speech; "
-        f"(New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('{line}')"
-    ])
+    # speak immediately
+    speaker.Speak(line)
