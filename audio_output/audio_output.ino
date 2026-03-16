@@ -1,11 +1,14 @@
 #include <SPI.h>
 #include <MFRC522.h>
+#include <Audio.h>
 
 #define SS_PIN 5
 #define RST_PIN 22
 
 MFRC522 rfid(SS_PIN, RST_PIN);
 MFRC522::MIFARE_Key key;
+
+Audio audio;
 
 byte block = 4;
 byte buffer[18];
@@ -20,12 +23,16 @@ void setup() {
   for (byte i = 0; i < 6; i++)
     key.keyByte[i] = 0xFF;
 
+  // MAX98357A I2S pins
+  audio.setPinout(26, 25, 27);
+  audio.setVolume(15);
+
   Serial.println("Scan tag...");
 }
 
 void loop() {
-try{
 
+  audio.loop();
 
   if (!rfid.PICC_IsNewCardPresent())
     return;
@@ -48,29 +55,24 @@ try{
 
   status = rfid.MIFARE_Read(block, buffer, &size);
 
-  // if(status != MFRC522::STATUS_OK){
-  //   Serial.println("Read failed");
-  //   return;
-  // }
-
   String text = "";
 
   for(byte i=0;i<16;i++){
-    text += (char)buffer[i];
+    if(buffer[i] != 0)
+      text += (char)buffer[i];
   }
-
 
   if(status == MFRC522::STATUS_OK){
-  Serial.println(text);
+
+    Serial.println(text);
+
+    // speak text
+    audio.connecttospeech(text.c_str(), "en");
+
   }
 
-  // IMPORTANT: stop communication so next tag can be read
   rfid.PICC_HaltA();
   rfid.PCD_StopCrypto1();
 
   delay(2000);
-}
-catch (int e){
-Serial.println("hello error");
-}
 }
