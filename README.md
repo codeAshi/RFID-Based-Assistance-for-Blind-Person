@@ -1,6 +1,3 @@
->🚧 Under Construction
->
->
 # 📌 RFID-Based Audio Assistance System (ESP32)
 
 ## 📖 Overview
